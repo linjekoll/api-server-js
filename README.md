@@ -8,4 +8,4 @@ Handles:
 
 Request URLs adhere to the following format:
 
-`/:api_key/providers/:provider_id/journeys/:journey_id`
+PUT: `/:api_key/providers/:provider_id/journeys/:journey_id`
