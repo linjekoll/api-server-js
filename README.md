@@ -1,8 +1,9 @@
 # API server for Linjekoll
 ## In general
 Handles:
-  - validation
-  - pushing data to beanstalk
+
+- validation
+- pushing data to beanstalk
   
 ## API reference
 
