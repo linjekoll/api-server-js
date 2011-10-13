@@ -29,9 +29,7 @@ app.configure('production', function(){
 // Routes
 
 app.get('/', function(req, res){
-  res.render('index', {
-    title: 'Express'
-  });
+  res.json({apa: "bepa", depa: "fepa"});
 });
 
 app.listen(3000);

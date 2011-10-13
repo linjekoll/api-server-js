@@ -5,5 +5,8 @@
   , "dependencies": {
       "express": "2.4.7"
     , "jade": ">= 0.0.1"
+    , "mongoose" : "~> 2.0.0"
+    , "express-namespace" : ">= 0.0.3"
+    , "nodestalker" : "~> 0.1.2"
   }
 }
