@@ -4,8 +4,14 @@
  */
 
 var express = require('express');
-
+require('express-namespace');
+var bs = require('nodestalker/lib/beanstalk_client');
+var client = bs.Client();
+var tube = 'tube';
 var app = module.exports = express.createServer();
+// nodestalker config
+
+
 
 // Configuration
 
@@ -28,8 +34,28 @@ app.configure('production', function(){
 
 // Routes
 
-app.get('/', function(req, res){
-  res.json({apa: "bepa", depa: "fepa"});
+app.namespace('/:api_key/', function () {
+  
+});
+
+app.get('/get', function(req, res) {
+  client.watch(tube).onSuccess(function(data) {
+    client.reserve().onSuccess(function(job) {
+      console.log(job);
+    });
+  });
+});
+
+app.get('/put', function(req, res){
+  console.log("Put!");
+  client.use(tube).onSuccess(function(data) {
+  console.log(data);
+
+  client.put('my job').onSuccess(function(data) {
+    console.log(data);
+    client.disconnect();
+  });
+});
 });
 
 app.listen(3000);
