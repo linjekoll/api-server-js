@@ -9,5 +9,6 @@
     , "express-namespace": "~> 0.0.3"
     , "nodestalker":       "~> 0.1.2"
     , "mongoose":          "~> 2.0"
+    , "validator":         "~> 0.2.9"
   }
 }
