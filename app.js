@@ -7,12 +7,24 @@ var express = require('express');
 require('express-namespace');
 var bs        = require('nodestalker/lib/beanstalk_client');
 var client    = bs.Client();
-var tube      = 'tube';
+var tube      = 'lineart.update';
 var app       = module.exports = express.createServer();
 
 
 // Validator configuration
-var check = require('validator').check;
+var Validator = require('validator').Validator;
+var v = new Validator();
+v.errors = [];
+
+v.error = function (msg) {
+  this.errors.push(msg);
+  return this;
+};
+v.getErrors = function() {
+  var messages = this.errors.slice();
+  this.errors = [];
+  return messages;
+};
 
 // Configuration
 
@@ -63,9 +75,10 @@ app.namespace('/:api_key/providers', function () {
         
         result = app.validate(data);
         if (!result.valid) {
-          res.send("Not valid :( " + result.message);
+          res.json({valid: false, errors: result.messages}, 400);
         } else {
-          res.send("Valid!");
+          app.toBeanstalk(data);
+          res.send();
         }
       });
     });
@@ -93,7 +106,7 @@ app.get('/pop', function(req, res) {
   console.log("Pop!");
   client.watch(tube).onSuccess(function(data) {
     client.reserve().onSuccess(function(job) {
-      console.log(job);
+      res.send(job.data);
     });
   });
 });
@@ -119,18 +132,27 @@ app.validate = function(data) {
     "update",
     "alert"  
   ];
-  try {
-    check(data.event).notNull().in(acceptedEvents);
-    check(data.id).notNull().notEmpty().isAlphanumeric();
-    check(data.origin_station).isInt().min(1);
-    // check(data.destination_station).isInt().min(1);
-    // check(data.arrival_time).isInt();
-    // check(data.provider_id).isInt().min(1);
-    // check(data.line_id).isInt().min(1);
-  } catch (e) {
-    return {valid: false, message: e.message};
+  v.check(data.event, 'Error in event').in(acceptedEvents);
+  v.check(data.id, 'Error in id').notNull().notEmpty().isAlphanumeric();
+  v.check(data.origin_station, 'Error in origin_station').isInt().min(1);
+  // check(data.destination_station).isInt().min(1);
+  // check(data.arrival_time).isInt();
+  // check(data.provider_id).isInt().min(1);
+  // check(data.line_id).isInt().min(1);
+  var errors = v.getErrors();
+  if (errors.length < 1) {
+    return {valid: true}
+  } else {
+    return {valid: false, messages: errors};
   }
-  return {valid: true};
+};
+
+// Beanstalk
+
+app.toBeanstalk = function(data) {
+  client.use(tube).onSuccess(function() {
+    client.put(data);
+  });
 };
 
 app.listen(3000);
