@@ -4,20 +4,12 @@
 */
 
 var express   = require('express'); require('express-namespace');
-var sys       = require("sys");
 var bs        = require('nodestalker/lib/beanstalk_client');
 var client    = bs.Client();
-var validate  = require("./lib/validation.js")
+var validate  = require("./lib/validation.js");
 var tube      = 'lineart.update';
 var app       = module.exports = express.createServer();
-
-
-/* Prints the given argument */
-var debug = function(data) {
-  sys.puts(sys.inspect(data));
-};
-
-// Configuration
+var helper    = require("./lib/helper.js");
 
 app.configure(function(){
   app.set('views', __dirname + '/views');
