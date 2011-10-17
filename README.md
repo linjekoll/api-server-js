@@ -1,5 +1,19 @@
 # API server for Linjekoll
+
+## Installation
+
+Start by cloning the project.
+
+`git clone git@github.com:linjekoll/api-server-js.git`
+
+Navigate to the downloaded folder and run bundler.
+
+`cd api-server-js && bundle install`
+
+Start the server by running `foreman start`.
+
 ## In general
+
 Handles:
 
 - validation
@@ -18,7 +32,7 @@ JSON data in the following format:
 
 ## Setup
 
-Install node.js ~> 0.4.2 and npm.
+Install node.js ~> 0.4.12 and npm.
 
 Then install dependencies and run the server by typing: 
 
