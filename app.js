@@ -32,7 +32,7 @@ app.namespace('/:api_key/providers/:provider_id/journeys', function() {
       },
       400);
     } else {
-      helper.debug("Everything went okey");
+      helper.debug("Everything went okay");
       queue.push(data);
       res.send();
     }

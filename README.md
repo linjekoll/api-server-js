@@ -48,7 +48,7 @@ Ingoing data.
 - **alert_message** (String) Is there anything wrong ? This might be `null`.
 - **line_id** (Integer) What line do we want to update? Value from database, `line_id`.
 
-Returns 204 if everything went okey, otherwise 400.
+Returns 204 if everything went okay, otherwise 400.
 
 An 400 request returns this data.
 
