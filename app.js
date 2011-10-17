@@ -18,18 +18,21 @@ app.namespace('/:api_key/providers/:provider_id/journeys', function() {
   *  /:api_key/providers/:provider_id/journeys/:journey_id
   */
   app.put('/:journey_id', function(req, res) {
+    helper.debug("Request was made to /:journey_id");
     var data = req.body;
     data.journey_id = req.params.journey_id;
     data.provider_id = req.params.provider_id;
 
     errors = validate.eval(data);
     if (errors.length > 0) {
+      helper.debug("Request was not valid, " + errors.length + " errors found.");
       res.json({
         valid: false,
         errors: errors
       },
       400);
     } else {
+      helper.debug("Everything went okey");
       queue.push(data);
       res.send();
     }
