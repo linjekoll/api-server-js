@@ -3,13 +3,18 @@
 * Module dependencies.
 */
 
-var express = require('express');
-require('express-namespace');
+var express   = require('express'); require('express-namespace');
+var sys       = require("sys");
 var bs        = require('nodestalker/lib/beanstalk_client');
 var client    = bs.Client();
 var tube      = 'lineart.update';
 var app       = module.exports = express.createServer();
 
+
+/* Prints the given argument */
+var debug = function(data) {
+  sys.puts(sys.inspect(data));
+};
 
 // Validator configuration
 var Validator = require('validator').Validator;
@@ -73,11 +78,11 @@ app.namespace('/:api_key/providers', function () {
         data.journey_id = req.params.journey_id;
         data.provider_id = req.params.provider_id;
         
-        result = app.validate(data);
-        if (!result.valid) {
-          res.json({valid: false, errors: result.messages}, 400);
+        errors = app.validate(data);
+        if(errors.length > 0){
+          res.json({valid: false, errors: errors}, 400);
         } else {
-          app.toBeanstalk(data);
+          // app.toBeanstalk(data);
           res.send();
         }
       });
@@ -126,25 +131,20 @@ app.get('/push', function(req, res){
 // Validation
 
 app.validate = function(data) {
-  var acceptedEvents = 
-  [
+  var acceptedEvents = [
     "did_leave_station",
     "update",
     "alert"  
   ];
+    
   v.check(data.event, 'Error in event').in(acceptedEvents);
-  v.check(data.id, 'Error in id').notNull().notEmpty().isAlphanumeric();
-  v.check(data.origin_station, 'Error in origin_station').isInt().min(1);
+  v.check(data.journey_id, 'Error in id').notNull().notEmpty().isAlphanumeric();
+  v.check(data.previous_station, 'Error in origin_station').isInt().min(1);
   // check(data.destination_station).isInt().min(1);
   // check(data.arrival_time).isInt();
   // check(data.provider_id).isInt().min(1);
   // check(data.line_id).isInt().min(1);
-  var errors = v.getErrors();
-  if (errors.length < 1) {
-    return {valid: true}
-  } else {
-    return {valid: false, messages: errors};
-  }
+  return v.getErrors();
 };
 
 // Beanstalk
