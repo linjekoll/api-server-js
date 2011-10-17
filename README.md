@@ -59,6 +59,10 @@ An 400 request returns this data.
 }
 ```
 
+## GET /
+
+Just a heartbeat.
+
 ## Setup
 
 Install node.js ~> 0.4.12 and npm.
