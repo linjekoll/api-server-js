@@ -42,7 +42,7 @@ describe "requests" do
       
       it "should not care for non int previous_station" do
         @request = visit(visit_url, valid_data.merge(previous_station: "invalid"), :put)
-        @request.body["errors"].should include("Error in origin_station")
+        @request.body["errors"].should include("Error in previous_station")
       end
       
       it "should not care for non int arrival_time" do
