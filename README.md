@@ -27,6 +27,7 @@ Start the server by running `foreman start`.
 - **journey_id** (Object) What journey/trip should be updated? This might be any value.
 
 Ingoing data.
+
 ``` javascript
 {
   event: "event",
