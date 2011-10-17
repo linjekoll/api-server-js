@@ -136,14 +136,15 @@ app.validate = function(data) {
     "update",
     "alert"  
   ];
-    
+  
   v.check(data.event, 'Error in event').in(acceptedEvents);
   v.check(data.journey_id, 'Error in id').notNull().notEmpty().isAlphanumeric();
   v.check(data.previous_station, 'Error in origin_station').isInt().min(1);
-  // check(data.destination_station).isInt().min(1);
-  // check(data.arrival_time).isInt();
-  // check(data.provider_id).isInt().min(1);
-  // check(data.line_id).isInt().min(1);
+  v.check(data.next_station).isInt().min(1);
+  v.check(data.arrival_time).isInt().min(1);
+  v.check(data.provider_id).isInt().min(1);
+  v.check(data.journey_id).isInt().min(1);
+  v.check(data.line_id).isInt().min(1);
   return v.getErrors();
 };
 

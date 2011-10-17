@@ -13,15 +13,54 @@ describe "requests" do
   }
   
   describe "PUT" do
+    let(:visit_url) { "#{url}/#{api_key}/providers/1/journeys/1" }
+    
     it "should be able to handle valid data" do
-      visit("#{url}/#{api_key}/providers/1/journeys/1", valid_data, :put).code.should eq(204)
+      visit(visit_url, valid_data, :put).code.should eq(204)
+    end
+    
+    it "should accept an empty alert message" do
+      visit(visit_url, valid_data.merge(alert_message: nil), :put).code.should eq(204)
     end
     
     describe "non valid" do
-      it "should raise an error if event is invalid" do
-        request = visit("#{url}/#{api_key}/providers/1/journeys/1", valid_data.merge(event: "invalid"), :put)
-        request.code.should eq(400)
-        request.body["errors"].should include("Error in event")
+      it  "should not care for an event that doesn't exist" do
+        @request = visit(visit_url, valid_data.merge(event: "invalid"), :put)
+        @request.body["errors"].should include("Error in event")
+      end
+      
+      it  "should not care for non int next_station" do
+        @request = visit(visit_url, valid_data.merge(next_station: "invalid"), :put)
+        @request.body["errors"].should include("Invalid integer")
+      end
+      
+      it "should not care for non int previous_station" do
+        @request = visit(visit_url, valid_data.merge(previous_station: "invalid"), :put)
+        @request.body["errors"].should include("Error in origin_station")
+      end
+      
+      it "should not care for non int arrival_time" do
+        @request = visit(visit_url, valid_data.merge(arrival_time: "invalid"), :put)
+        @request.body["errors"].should include("Invalid integer")
+      end
+      
+      it "should not care for non int line_id" do
+        @request = visit(visit_url, valid_data.merge(line_id: "invalid"), :put)
+        @request.body["errors"].should include("Invalid integer")
+      end
+      
+      it "should not care for non int provider_id" do
+        @request = visit("#{url}/#{api_key}/providers/invalid/journeys/1", valid_data, :put)
+        @request.body["errors"].should include("Invalid integer")
+      end
+      
+      it "should not care for non int journey_id" do
+        @request = visit("#{url}/#{api_key}/providers/1/journeys/invalid", valid_data, :put)
+        @request.body["errors"].should include("Invalid integer")
+      end
+      
+      after(:each) do
+        @request.code.should eq(400)
       end
     end
   end
