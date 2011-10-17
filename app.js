@@ -1,15 +1,12 @@
-
 /**
 * Module dependencies.
 */
 
 var express   = require('express'); require('express-namespace');
-var bs        = require('nodestalker/lib/beanstalk_client');
-var client    = bs.Client();
-var validate  = require("./lib/validation.js");
-var tube      = 'lineart.update';
 var app       = module.exports = express.createServer();
+var validate  = require("./lib/validation.js");
 var helper    = require("./lib/helper.js");
+var queue     = require("./lib/queue.js");
 
 app.configure(function(){
   app.set('views', __dirname + '/views');
@@ -60,8 +57,7 @@ app.namespace('/:api_key/providers', function () {
         if(errors.length > 0){
           res.json({valid: false, errors: errors}, 400);
         } else {
-          // app.toBeanstalk(data);
-          res.send();
+          queue.push(data); res.send();
         }
       });
     });
@@ -106,13 +102,5 @@ app.get('/push', function(req, res){
   });
 });
 
-// Beanstalk
-
-app.toBeanstalk = function(data) {
-  client.use(tube).onSuccess(function() {
-    client.put(data);
-  });
-};
-
 app.listen(3001);
-console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
+console.log("Express server listening on port %d in %s mode, beanstalkd started on port %d", app.address().port, app.settings.env, 11300);
