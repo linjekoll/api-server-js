@@ -3,6 +3,9 @@ var helper = require("./lib/helper.js");
 var queue = require("./lib/queue.js");
 var app = require("./lib/initialize.js").initialize();
 
+/*
+* Journeys resource
+*/
 app.namespace('/:api_key/providers/:provider_id/journeys', function() {
   /*
   *  /:api_key/providers/:provider_id/journeys
@@ -33,17 +36,21 @@ app.namespace('/:api_key/providers/:provider_id/journeys', function() {
   });
 });
 
-app.namespace('/:api_key/providers/:provider_id', function() {
+/* 
+* Lines resource
+*/
+app.namespace('/:api_key/providers/:provider_id/lines', function() {
   /*
   *  /:api_key/providers/:provider_id/lines
   */
-  app.namespace('/lines', function() {
-    app.get('/', function(req, res) {
-      console.log("Got a line listing request for provider id: " + req.params.provider_id);
-    });
+  app.get('/', function(req, res) {
+    console.log("Got a line listing request for provider id: " + req.params.provider_id);
   });
 });
 
+/*
+  Providers resource
+*/
 app.namespace('/:api_key/providers', function() {
   /*
   * /:api_key/providers/
