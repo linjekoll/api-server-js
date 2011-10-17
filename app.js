@@ -7,6 +7,7 @@ var express   = require('express'); require('express-namespace');
 var sys       = require("sys");
 var bs        = require('nodestalker/lib/beanstalk_client');
 var client    = bs.Client();
+var validate  = require("./lib/validation.js")
 var tube      = 'lineart.update';
 var app       = module.exports = express.createServer();
 
@@ -14,21 +15,6 @@ var app       = module.exports = express.createServer();
 /* Prints the given argument */
 var debug = function(data) {
   sys.puts(sys.inspect(data));
-};
-
-// Validator configuration
-var Validator = require('validator').Validator;
-var v = new Validator();
-v.errors = [];
-
-v.error = function (msg) {
-  this.errors.push(msg);
-  return this;
-};
-v.getErrors = function() {
-  var messages = this.errors.slice();
-  this.errors = [];
-  return messages;
 };
 
 // Configuration
@@ -78,7 +64,7 @@ app.namespace('/:api_key/providers', function () {
         data.journey_id = req.params.journey_id;
         data.provider_id = req.params.provider_id;
         
-        errors = app.validate(data);
+        errors = validate.eval(data);
         if(errors.length > 0){
           res.json({valid: false, errors: errors}, 400);
         } else {
@@ -127,26 +113,6 @@ app.get('/push', function(req, res){
     });
   });
 });
-
-// Validation
-
-app.validate = function(data) {
-  var acceptedEvents = [
-    "did_leave_station",
-    "update",
-    "alert"  
-  ];
-  
-  v.check(data.event, 'Error in event').in(acceptedEvents);
-  v.check(data.journey_id, 'Error in id').notNull().notEmpty().isAlphanumeric();
-  v.check(data.previous_station, 'Error in origin_station').isInt().min(1);
-  v.check(data.next_station).isInt().min(1);
-  v.check(data.arrival_time).isInt().min(1);
-  v.check(data.provider_id).isInt().min(1);
-  v.check(data.journey_id).isInt().min(1);
-  v.check(data.line_id).isInt().min(1);
-  return v.getErrors();
-};
 
 // Beanstalk
 
