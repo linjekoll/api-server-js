@@ -25,7 +25,7 @@ app.namespace('/:api_key/providers/:provider_id/journeys', function() {
 
     errors = validate.eval(data);
     if (errors.length > 0) {
-      helper.debug("Request was not valid, " + errors.length + " errors found.");
+      helper.debug("Request was not valid, " + errors.length + " error(s) found.");
       res.json({
         valid: false,
         errors: errors
