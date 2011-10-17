@@ -5,6 +5,8 @@ Handles:
 - validation
 - pushing data to beanstalk
 
+A live server can be found [here](http://46.16.232.244:3001/).
+
 ## Installation
 
 Start by cloning the project.
