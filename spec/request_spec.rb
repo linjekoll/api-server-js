@@ -16,5 +16,13 @@ describe "requests" do
     it "should be able to handle valid data" do
       visit("#{url}/#{api_key}/providers/1/journeys/1", valid_data, :put).code.should eq(204)
     end
+    
+    describe "non valid" do
+      it "should raise an error if event is invalid" do
+        request = visit("#{url}/#{api_key}/providers/1/journeys/1", valid_data.merge(event: "invalid"), :put)
+        request.code.should eq(400)
+        request.body["errors"].should include("Error in event")
+      end
+    end
   end
 end
