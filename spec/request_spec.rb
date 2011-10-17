@@ -12,6 +12,12 @@ describe "requests" do
     }
   }
   
+  describe "GET" do
+    it "should have a heartbeat" do
+      visit(url).code.should eq(200)
+    end
+  end
+  
   describe "PUT" do
     let(:visit_url) { "#{url}/#{api_key}/providers/1/journeys/1" }
     

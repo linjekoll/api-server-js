@@ -60,5 +60,12 @@ app.namespace('/:api_key/providers', function() {
   });
 });
 
+/*
+ Just a heartbeat
+*/
+app.get("/", function(req, res) {
+  res.json({heartbeat: true})
+})
+
 app.listen(3001);
 console.log("Express server listening on port %d in %s mode, beanstalkd started on port %d", app.address().port, app.settings.env, 11300);
