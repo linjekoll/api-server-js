@@ -10,5 +10,6 @@
     , "nodestalker":       "~> 0.1.2"
     , "mongoose":          "~> 2.0"
     , "validator":         "~> 0.2.9"
+    , "restler":           "~> 0.2.1"
   }
 }
