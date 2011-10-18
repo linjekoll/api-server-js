@@ -1,9 +1,9 @@
-var zombie = require("zombie");
-
+require('jasmine-node');
+var rest = require('restler');
 describe("description", function() {
   it("description", function() {
-    // zombie.visit("http://localhost:3000/", function (err, browser, status) {
-    //   expect(browser.text).toEqual("A")
-    // });
+    rest.get("http://www.google.com").on('complete', function(data, response) {
+      expect(data).toMatch(/jesper/i);
+    });
   });
 });
