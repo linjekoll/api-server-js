@@ -55,15 +55,30 @@ An 400 request returns this data.
 ``` javascript
 {
   valid: false
-  errors: {
-    
-  }
+  errors: ["id is not a valid int"]
 }
 ```
 
 ## GET /
 
 Just a heartbeat.
+
+## What's being pushed to Beanstalkd?
+
+``` javascript
+{
+  event: "event",
+  next_station: 8998235,
+  previous_station: 898345,
+  arrival_time: 1318843870,
+  alert_message: "oops!",
+  line_id: 2342
+  provider_id: 123123,
+  journey_id: 123123
+}
+```
+
+*Here we're using the same attributes as above.*
 
 ## Setup
 
