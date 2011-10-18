@@ -1,159 +1,74 @@
+var validate = require("./lib/validation.js");
+var helper = require("./lib/helper.js");
+var queue = require("./lib/queue.js");
+var app = require("./lib/initialize.js").initialize();
 
-/**
-* Module dependencies.
+/*
+* Journeys resource
 */
-
-var express = require('express');
-require('express-namespace');
-var bs        = require('nodestalker/lib/beanstalk_client');
-var client    = bs.Client();
-var tube      = 'lineart.update';
-var app       = module.exports = express.createServer();
-
-
-// Validator configuration
-var Validator = require('validator').Validator;
-var v = new Validator();
-v.errors = [];
-
-v.error = function (msg) {
-  this.errors.push(msg);
-  return this;
-};
-v.getErrors = function() {
-  var messages = this.errors.slice();
-  this.errors = [];
-  return messages;
-};
-
-// Configuration
-
-app.configure(function(){
-  app.set('views', __dirname + '/views');
-  app.set('view engine', 'jade');
-  app.use(express.bodyParser());
-  app.use(express.methodOverride());
-  app.use(app.router);
-  app.use(express.static(__dirname + '/public'));
-});
-
-app.configure('development', function(){
-  app.use(express.errorHandler({ dumpExceptions: true, showStack: true })); 
-});
-
-app.configure('production', function(){
-  app.use(express.errorHandler()); 
-});
-
-// Routes
-
-app.namespace('/:api_key/providers', function () {
-  app.namespace('/:provider_id', function() {
-    app.namespace('/journeys', function() {
-      
-      /*
-       *  /:api_key/providers/:provider_id/journeys
-       */
-      app.get('/', function(req, res) {
-        console.log("Got a journey listing request for provider id: " 
-        + req.params.provider_id);
-      });
-      
-      /*
-       *  /:api_key/providers/:provider_id/journeys/:journey_id
-       */
-      app.put('/:journey_id', function(req, res) {
-        console.log("Got a put request for provider id: " 
-        + req.params.provider_id 
-        + " and journey id: " 
-        + req.params.journey_id
-        + " and body: ", req.body);
-        
-        var data = req.body;
-        data.journey_id = req.params.journey_id;
-        data.provider_id = req.params.provider_id;
-        
-        result = app.validate(data);
-        if (!result.valid) {
-          res.json({valid: false, errors: result.messages}, 400);
-        } else {
-          app.toBeanstalk(data);
-          res.send();
-        }
-      });
-    });
-    
-    /*
-     *  /:api_key/providers/:provider_id/lines
-     */
-    app.namespace('/lines', function() {
-      app.get('/', function(req, res) {
-        console.log("Got a line listing request for provider id: "
-        + req.params.provider_id);
-      });
-    });
+app.namespace('/:api_key/providers/:provider_id/journeys', function() {
+  /*
+  *  /:api_key/providers/:provider_id/journeys
+  */
+  app.get('/', function(req, res) {
+    console.log("Got a journey listing request for provider id: " + req.params.provider_id);
   });
 
   /*
-  *  /:api_key/providers/
+  *  /:api_key/providers/:provider_id/journeys/:journey_id
+  */
+  app.put('/:journey_id', function(req, res) {
+    helper.debug("Request was made to /:journey_id");
+    var data = req.body;
+    data.journey_id = req.params.journey_id;
+    data.provider_id = req.params.provider_id;
+
+    errors = validate.eval(data);
+    if (errors.length > 0) {
+      helper.debug("Request was not valid, " + errors.length + " error(s) found.");
+      res.json({
+        valid: false,
+        errors: errors
+      },
+      400);
+    } else {
+      helper.debug("Everything went okay");
+      queue.push(data);
+      res.send();
+    }
+  });
+});
+
+/* 
+* Lines resource
+*/
+app.namespace('/:api_key/providers/:provider_id/lines', function() {
+  /*
+  *  /:api_key/providers/:provider_id/lines
+  */
+  app.get('/', function(req, res) {
+    console.log("Got a line listing request for provider id: " + req.params.provider_id);
+  });
+});
+
+/*
+  Providers resource
+*/
+app.namespace('/:api_key/providers', function() {
+  /*
+  * /:api_key/providers/
   */
   app.get('/', function(req, res) {
     console.log("Requested provider listing - route: GET /" + req.params.api_key + "/providers");
   });
 });
 
-app.get('/pop', function(req, res) {
-  console.log("Pop!");
-  client.watch(tube).onSuccess(function(data) {
-    client.reserve().onSuccess(function(job) {
-      res.send(job.data);
-    });
-  });
-});
-
-app.get('/push', function(req, res){
-  console.log("Push!");
-  client.use(tube).onSuccess(function(data) {
-    console.log(data);
-
-    client.put('my job').onSuccess(function(data) {
-      console.log(data);
-      client.disconnect();
-    });
-  });
-});
-
-// Validation
-
-app.validate = function(data) {
-  var acceptedEvents = 
-  [
-    "did_leave_station",
-    "update",
-    "alert"  
-  ];
-  v.check(data.event, 'Error in event').in(acceptedEvents);
-  v.check(data.id, 'Error in id').notNull().notEmpty().isAlphanumeric();
-  v.check(data.origin_station, 'Error in origin_station').isInt().min(1);
-  // check(data.destination_station).isInt().min(1);
-  // check(data.arrival_time).isInt();
-  // check(data.provider_id).isInt().min(1);
-  // check(data.line_id).isInt().min(1);
-  var errors = v.getErrors();
-  if (errors.length < 1) {
-    return {valid: true}
-  } else {
-    return {valid: false, messages: errors};
-  }
-};
-
-// Beanstalk
-
-app.toBeanstalk = function(data) {
-  client.use(tube).onSuccess(function() {
-    client.put(data);
-  });
-};
+/*
+ Just a heartbeat
+*/
+app.get("/", function(req, res) {
+  res.json({heartbeat: true})
+})
 
 app.listen(3001);
-console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
+console.log("Express server listening on port %d in %s mode, beanstalkd started on port %d", app.address().port, app.settings.env, 11300);
